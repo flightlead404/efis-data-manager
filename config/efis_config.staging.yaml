@@ -1,0 +1,91 @@
+# EFIS Data Manager Configuration - Staging Environment
+# This configuration is for pre-production testing
+
+version: "1.0.0"
+environment: "staging"
+
+# Windows System Configuration (Staging)
+windows:
+  # Virtual USB drive settings - using staging VHD
+  virtualDriveFile: "C:\\Staging\\EFIS\\virtualEFISUSB.vhd"
+  mountTool: "C:\\Program Files\\ImDisk\\MountImg.exe"
+  driveLetter: "E:"
+  
+  # Logging configuration
+  logFile: "C:\\Staging\\EFIS\\logs\\MountEFIS.log"
+  logLevel: "INFO"
+  
+  # Network synchronization settings - production-like intervals
+  syncInterval: 900  # 15 minutes for staging
+  macbookIP: "192.168.1.101"  # Staging MacBook IP
+  syncPort: 22
+  retryAttempts: 3
+  retryDelay: 300  # 5 minute retry delay
+  
+  # Service settings
+  serviceName: "EFISDataManagerStaging"
+  serviceDisplayName: "EFIS Data Manager Service (Staging)"
+
+# macOS System Configuration (Staging)
+macos:
+  # File archive paths - using staging directories
+  archivePath: "/Users/staging/EFIS/EFIS-USB"
+  demoPath: "/Users/staging/EFIS/EFIS-DEMO"
+  logbookPath: "/Users/staging/EFIS/Logbooks"
+  
+  # Logging configuration
+  logLevel: "INFO"
+  
+  # Check intervals - production-like
+  checkInterval: 1800  # 30 minutes
+  navCheckTime: "02:00"  # Different time to avoid conflicts
+  softwareCheckTime: "02:30"
+  
+  # USB drive settings
+  usbMountPath: "/Volumes"
+  driveIdentifiers:
+    - "EFIS_DRIVE"
+    - ".efis_marker"
+  
+  # Web scraping settings
+  userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (Staging)"
+  requestTimeout: 20
+  maxRetries: 3
+  
+  # Daemon settings
+  daemonName: "com.efis.datamanager.staging"
+  pidFile: "/tmp/efis_data_manager_staging.pid"
+
+# GRT Avionics URLs - production URLs
+grtUrls:
+  navDatabase: "https://grtavionics.com/downloads/nav-database/"
+  hxrSoftware: "https://grtavionics.com/downloads/hxr-software/"
+  miniAPSoftware: "https://grtavionics.com/downloads/mini-ap-software/"
+  ahrsSoftware: "https://grtavionics.com/downloads/ahrs-software/"
+  servoSoftware: "https://grtavionics.com/downloads/servo-software/"
+
+# Shared Settings
+logging:
+  # Production-like logging
+  maxBytes: 10485760  # 10MB
+  backupCount: 5
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  dateFormat: "%Y-%m-%d %H:%M:%S"
+
+# Notification settings - enabled for staging testing
+notifications:
+  enabled: true
+  email:
+    enabled: false  # Email disabled in staging
+    smtpServer: ""
+    smtpPort: 587
+    username: ""
+    password: ""
+    recipient: ""
+
+# File transfer settings - production-like
+transfer:
+  chunkSize: 8192
+  verifyIntegrity: true
+  compressionLevel: 6
+  preserveTimestamps: true

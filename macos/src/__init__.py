@@ -1,0 +1,1 @@
+# macOS EFIS Data Manager Daemon

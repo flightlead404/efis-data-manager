@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.efis-data-manager.daemon</string>
+    
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/python3</string>
+        <string>-m</string>
+        <string>efis_macos.daemon</string>
+        <string>--daemon</string>
+    </array>
+    
+    <key>WorkingDirectory</key>
+    <string>/Users/mwalker/efis-data-manager</string>
+    
+    <key>StandardOutPath</key>
+    <string>/Users/mwalker/Library/Logs/efis-data-manager-stdout.log</string>
+    
+    <key>StandardErrorPath</key>
+    <string>/Users/mwalker/Library/Logs/efis-data-manager-stderr.log</string>
+    
+    <key>RunAtLoad</key>
+    <true/>
+    
+    <key>KeepAlive</key>
+    <dict>
+        <key>SuccessfulExit</key>
+        <false/>
+        <key>Crashed</key>
+        <true/>
+    </dict>
+    
+    <key>StartInterval</key>
+    <integer>300</integer>
+    
+    <key>ThrottleInterval</key>
+    <integer>30</integer>
+    
+    <key>ProcessType</key>
+    <string>Background</string>
+    
+    <key>LowPriorityIO</key>
+    <true/>
+    
+    <key>Nice</key>
+    <integer>1</integer>
+    
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin</string>
+        <key>PYTHONPATH</key>
+        <string>/Users/mwalker/efis-data-manager/macos/src</string>
+    </dict>
+    
+    <key>UserName</key>
+    <string>mwalker</string>
+    
+    <key>GroupName</key>
+    <string>staff</string>
+</dict>
+</plist>

@@ -1,0 +1,26 @@
+# EFIS Data Manager - macOS Daemon Configuration
+
+# File paths for data storage
+archive_path: "/Users/mwalker/Library/CloudStorage/Dropbox/Flying/EFIS-USB"
+demo_path: "/Users/mwalker/Library/CloudStorage/Dropbox/Flying/EFIS-DEMO"
+logbook_path: "/Users/mwalker/Library/CloudStorage/Dropbox/Flying/Logbooks"
+
+# Timing configuration
+check_interval: 3600  # Check interval in seconds (1 hour)
+nav_check_time: "01:00"  # Daily NAV database check time (HH:MM)
+software_check_time: "01:30"  # Daily software check time (HH:MM)
+
+# Logging configuration
+log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+log_file: "/Users/mwalker/Library/Logs/efis-data-manager.log"
+
+# Process management
+pid_file: "/tmp/efis-macos-daemon.pid"
+
+# GRT Avionics URLs
+grt_urls:
+  nav_database: "https://grtavionics.com/downloads/nav-database/"
+  hxr_software: "https://grtavionics.com/downloads/hxr-software/"
+  mini_ap_software: "https://grtavionics.com/downloads/mini-ap-software/"
+  ahrs_software: "https://grtavionics.com/downloads/ahrs-software/"
+  servo_software: "https://grtavionics.com/downloads/servo-software/"

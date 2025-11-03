@@ -1,0 +1,92 @@
+# EFIS Data Manager Configuration - Development Environment
+# This configuration is optimized for development and testing
+
+version: "1.0.0"
+environment: "development"
+
+# Windows System Configuration (Development)
+windows:
+  # Virtual USB drive settings - using test VHD
+  virtualDriveFile: "C:\\Dev\\EFIS\\test_virtualEFISUSB.vhd"
+  mountTool: "C:\\Program Files\\ImDisk\\MountImg.exe"
+  driveLetter: "E:"
+  
+  # Logging configuration - more verbose for development
+  logFile: "C:\\Dev\\EFIS\\logs\\MountEFIS.log"
+  logLevel: "DEBUG"
+  
+  # Network synchronization settings - faster intervals for testing
+  syncInterval: 300  # 5 minutes for development
+  macbookIP: "127.0.0.1"  # localhost for development
+  syncPort: 22
+  retryAttempts: 2  # Fewer retries for faster feedback
+  retryDelay: 60  # 1 minute retry delay
+  
+  # Service settings
+  serviceName: "EFISDataManagerDev"
+  serviceDisplayName: "EFIS Data Manager Service (Development)"
+
+# macOS System Configuration (Development)
+macos:
+  # File archive paths - using development directories
+  archivePath: "/tmp/efis-dev/EFIS-USB"
+  demoPath: "/tmp/efis-dev/EFIS-DEMO"
+  logbookPath: "/tmp/efis-dev/Logbooks"
+  
+  # Logging configuration - debug level
+  logLevel: "DEBUG"
+  
+  # Check intervals - faster for development
+  checkInterval: 300  # 5 minutes
+  navCheckTime: "01:00"
+  softwareCheckTime: "01:30"
+  
+  # USB drive settings
+  usbMountPath: "/Volumes"
+  driveIdentifiers:
+    - "EFIS_DRIVE"
+    - ".efis_marker"
+    - "TEST_EFIS"  # Additional test identifier
+  
+  # Web scraping settings - more aggressive for testing
+  userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (Development)"
+  requestTimeout: 10  # Shorter timeout for development
+  maxRetries: 2
+  
+  # Daemon settings
+  daemonName: "com.efis.datamanager.dev"
+  pidFile: "/tmp/efis_data_manager_dev.pid"
+
+# GRT Avionics URLs - using test endpoints if available
+grtUrls:
+  navDatabase: "https://grtavionics.com/downloads/nav-database/"
+  hxrSoftware: "https://grtavionics.com/downloads/hxr-software/"
+  miniAPSoftware: "https://grtavionics.com/downloads/mini-ap-software/"
+  ahrsSoftware: "https://grtavionics.com/downloads/ahrs-software/"
+  servoSoftware: "https://grtavionics.com/downloads/servo-software/"
+
+# Shared Settings
+logging:
+  # More verbose logging for development
+  maxBytes: 5242880  # 5MB (smaller for development)
+  backupCount: 3
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s"
+  dateFormat: "%Y-%m-%d %H:%M:%S"
+
+# Notification settings - disabled for development
+notifications:
+  enabled: false  # Disable notifications during development
+  email:
+    enabled: false
+    smtpServer: ""
+    smtpPort: 587
+    username: ""
+    password: ""
+    recipient: ""
+
+# File transfer settings - optimized for development
+transfer:
+  chunkSize: 4096  # Smaller chunks for testing
+  verifyIntegrity: true
+  compressionLevel: 1  # Lower compression for speed
+  preserveTimestamps: true

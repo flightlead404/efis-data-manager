@@ -1,0 +1,88 @@
+# EFIS Data Manager Configuration
+# This file contains configuration settings for both Windows and macOS components
+
+# Windows System Configuration
+windows:
+  # Virtual USB drive settings
+  virtualDriveFile: "C:\\Users\\fligh\\OneDrive\\Desktop\\virtualEFISUSB.vhd"
+  mountTool: "C:\\Program Files\\ImDisk\\MountImg.exe"
+  driveLetter: "E:"
+  
+  # Logging configuration
+  logFile: "C:\\Scripts\\MountEFIS.log"
+  logLevel: "INFO"
+  
+  # Network synchronization settings
+  syncInterval: 1800  # 30 minutes in seconds
+  macbookIP: "192.168.1.100"  # Update with actual MacBook IP
+  syncPort: 22
+  retryAttempts: 3
+  retryDelay: 600  # 10 minutes in seconds
+  
+  # Service settings
+  serviceName: "EFISDataManager"
+  serviceDisplayName: "EFIS Data Manager Service"
+
+# macOS System Configuration  
+macos:
+  # File archive paths
+  archivePath: "/Users/mwalker/Library/CloudStorage/Dropbox/Flying/EFIS-USB"
+  demoPath: "/Users/mwalker/Library/CloudStorage/Dropbox/Flying/EFIS-DEMO"
+  logbookPath: "/Users/mwalker/Library/CloudStorage/Dropbox/Flying/Logbooks"
+  
+  # Logging configuration
+  logLevel: "INFO"
+  
+  # Check intervals (in seconds)
+  checkInterval: 3600  # 1 hour
+  navCheckTime: "01:00"  # Daily NAV database check time
+  softwareCheckTime: "01:30"  # Daily software check time
+  
+  # USB drive settings
+  usbMountPath: "/Volumes"
+  driveIdentifiers:
+    - "EFIS_DRIVE"
+    - ".efis_marker"
+  
+  # GRT Avionics URLs
+  grtUrls:
+    navDatabase: "https://grtavionics.com/downloads/nav-database/"
+    hxrSoftware: "https://grtavionics.com/downloads/hxr-software/"
+    miniAPSoftware: "https://grtavionics.com/downloads/mini-ap-software/"
+    ahrsSoftware: "https://grtavionics.com/downloads/ahrs-software/"
+    servoSoftware: "https://grtavionics.com/downloads/servo-software/"
+  
+  # Web scraping settings
+  userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+  requestTimeout: 30
+  maxRetries: 3
+  
+  # Daemon settings
+  daemonName: "com.efis.datamanager"
+  pidFile: "/tmp/efis_data_manager.pid"
+
+# Shared Settings
+logging:
+  # Log rotation settings
+  maxBytes: 10485760  # 10MB
+  backupCount: 5
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  dateFormat: "%Y-%m-%d %H:%M:%S"
+
+# Notification settings
+notifications:
+  enabled: true
+  email:
+    enabled: false
+    smtpServer: ""
+    smtpPort: 587
+    username: ""
+    password: ""
+    recipient: ""
+  
+# File transfer settings
+transfer:
+  chunkSize: 8192
+  verifyIntegrity: true
+  compressionLevel: 6
+  preserveTimestamps: true

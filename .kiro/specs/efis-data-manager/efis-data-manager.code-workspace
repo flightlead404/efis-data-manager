@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "../../.."
+		},
+		{
+			"path": "../../../../../Cursor Projects/efis-data-manager"
+		}
+	],
+	"settings": {
+		"kiroAgent.configureMCP": "Disabled"
+	}
+}

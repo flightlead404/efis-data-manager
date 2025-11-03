@@ -1,0 +1,31 @@
+{
+  "virtualDrive": {
+    "vhdPath": "C:\\Users\\fligh\\OneDrive\\Desktop\\virtualEFISUSB.vhd",
+    "mountTool": "C:\\Program Files\\ImDisk\\MountImg.exe",
+    "driveLetter": "E:",
+    "logFile": "C:\\Scripts\\MountEFIS.log"
+  },
+  "sync": {
+    "interval": 1800,
+    "macbookHostname": "MacBookM2.local",
+    "macbookIP": "192.168.1.100",
+    "httpPort": 8080,
+    "retryAttempts": 3,
+    "retryDelay": 300,
+    "maxRetryDelay": 3600,
+    "connectionTimeout": 10,
+    "requestTimeout": 30,
+    "batchSizeMB": 2,
+    "maxConcurrentRequests": 4
+  },
+  "monitoring": {
+    "checkInterval": 300,
+    "remountRetryDelay": 60
+  },
+  "logging": {
+    "level": "INFO",
+    "file": "C:\\Scripts\\efis-data-manager.log",
+    "maxSize": "10MB",
+    "backupCount": 5
+  }
+}
