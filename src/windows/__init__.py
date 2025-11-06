@@ -1,1 +1,0 @@
-# Windows EFIS Data Manager Component

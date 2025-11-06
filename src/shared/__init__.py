@@ -1,1 +1,0 @@
-# Shared EFIS Data Manager Components

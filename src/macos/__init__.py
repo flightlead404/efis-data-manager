@@ -1,1 +1,0 @@
-# macOS EFIS Data Manager Component
