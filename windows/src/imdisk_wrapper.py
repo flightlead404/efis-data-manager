@@ -93,24 +93,25 @@ class ImDiskWrapper:
                 if unmount_result != MountResult.SUCCESS:
                     return unmount_result
                     
-        # Prepare mount command
+        # Prepare mount command (using correct MountImg.exe syntax)
         cmd = [
             str(self.mount_tool_path),
-            "-a",  # Attach
-            "-f", str(vhd_file),  # File path
-            "-m", drive_letter  # Mount point
+            str(vhd_file),  # VHD file path (first argument)
+            "/Mount",       # Mount command
+            f"/Drive={drive_letter}"  # Drive letter assignment
         ]
         
         try:
             self.logger.info(f"Mounting VHD: {vhd_path} -> {drive_letter}")
             
-            # Execute mount command
+            # Execute mount command (prevent new window from opening)
             result = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
                 timeout=timeout,
-                check=False
+                check=False,
+                creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
             )
             
             # Log command output
@@ -169,26 +170,27 @@ class ImDiskWrapper:
             self.logger.info(f"Drive {drive_letter} is not mounted")
             return MountResult.SUCCESS
             
-        # Prepare unmount command
+        # Prepare unmount command (using correct MountImg.exe syntax)
         cmd = [
             str(self.mount_tool_path),
-            "-d",  # Detach
-            "-m", drive_letter  # Mount point
+            f"/Drive={drive_letter}",  # Drive letter to unmount
+            "/Unmount"                 # Unmount command
         ]
         
         if force:
-            cmd.append("-f")  # Force unmount
+            cmd.append("/Force")  # Force unmount
             
         try:
             self.logger.info(f"Unmounting drive: {drive_letter}")
             
-            # Execute unmount command
+            # Execute unmount command (prevent new window from opening)
             result = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
                 timeout=timeout,
-                check=False
+                check=False,
+                creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
             )
             
             # Log command output
@@ -306,14 +308,15 @@ class ImDiskWrapper:
         
         try:
             # Query ImDisk for mounted devices
-            cmd = [str(self.mount_tool_path), "-l"]
+            cmd = [str(self.mount_tool_path), "/List"]
             
             result = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
                 timeout=10,
-                check=False
+                check=False,
+                creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
             )
             
             if result.returncode == 0 and result.stdout:
@@ -378,15 +381,16 @@ class ImDiskWrapper:
             VHD file path or None if not found
         """
         try:
-            # Query ImDisk for device information
-            cmd = [str(self.mount_tool_path), "-l", "-m", drive_letter]
+            # Query ImDisk for device information  
+            cmd = [str(self.mount_tool_path), "/List", f"/Drive={drive_letter}"]
             
             result = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
                 timeout=10,
-                check=False
+                check=False,
+                creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
             )
             
             if result.returncode == 0 and result.stdout:
