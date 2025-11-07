@@ -324,19 +324,35 @@ class ImDiskWrapper:
             )
             
             if result.returncode == 0 and result.stdout:
+                # Debug: log the actual output to understand the format
+                self.logger.debug(f"ImDisk -l output: {repr(result.stdout)}")
+                
                 # Parse ImDisk output to find mounted drives
                 lines = result.stdout.strip().split('\n')
                 for line in lines:
-                    if ':' in line and 'VHD' in line.upper():
-                        # Extract drive letter and VHD path from output
-                        # Format varies, so this is a basic parser
+                    line = line.strip()
+                    if not line:
+                        continue
+                        
+                    self.logger.debug(f"Parsing line: {repr(line)}")
+                    
+                    # Look for lines that contain drive letters
+                    # ImDisk output format may vary, so check multiple patterns
+                    if ':' in line:
+                        # Extract potential drive letters from the line
                         parts = line.split()
                         for part in parts:
+                            # Look for drive letter patterns (like "E:" or "E:\")
                             if ':' in part and len(part) <= 3:
                                 drive_letter = part.rstrip('\\')
-                                drive_info = self.get_drive_info(drive_letter)
-                                if drive_info:
-                                    mounted_drives.append(drive_info)
+                                self.logger.debug(f"Found potential drive letter: {drive_letter}")
+                                
+                                # Check if this drive is actually mounted and accessible
+                                if self.is_drive_mounted(drive_letter):
+                                    drive_info = self.get_drive_info(drive_letter)
+                                    if drive_info:
+                                        mounted_drives.append(drive_info)
+                                        self.logger.debug(f"Added mounted drive: {drive_letter}")
                                 break
                                 
         except Exception as e:
@@ -654,8 +670,17 @@ def main():
                 else:
                     print("  No ImDisk drives currently mounted")
                     
+                # Additional debug: manually check common drive letters
+                print("\nManual drive letter check:")
+                for letter in ['D:', 'E:', 'F:', 'G:', 'H:']:
+                    if wrapper.is_drive_mounted(letter):
+                        print(f"  - {letter} is mounted")
+                    
             except Exception as e:
                 print(f"⚠️  WARNING: Could not list mounted drives: {e}")
+                if args.verbose:
+                    import traceback
+                    traceback.print_exc()
             
             # Test drive letter availability
             test_drive = args.drive
@@ -669,6 +694,22 @@ def main():
                         print(f"   Free space: {free_gb:.1f} GB")
             else:
                 print(f"✅ Drive letter {test_drive} is available for mounting")
+            
+            # Debug: Show raw imdisk -l output
+            if args.verbose:
+                print("\nRaw ImDisk command output:")
+                try:
+                    import subprocess
+                    imdisk_path = Path(args.tool)
+                    if imdisk_path.exists():
+                        result = subprocess.run([str(imdisk_path), "-l"], 
+                                              capture_output=True, text=True, timeout=10)
+                        print(f"Command: {imdisk_path} -l")
+                        print(f"Return code: {result.returncode}")
+                        print(f"Stdout: {repr(result.stdout)}")
+                        print(f"Stderr: {repr(result.stderr)}")
+                except Exception as e:
+                    print(f"Error running raw command: {e}")
             
             print("\n🎉 ImDisk test completed successfully!")
             print("\nNext steps:")
