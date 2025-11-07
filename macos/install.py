@@ -333,7 +333,7 @@ class MacOSInstaller:
                 },
                 "ThrottleInterval": 10,
                 "EnvironmentVariables": {
-                    "PATH": "/usr/local/bin:/usr/bin:/bin",
+                    "PATH": "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
                     "PYTHONPATH": str(self.install_dir)
                 }
             }
