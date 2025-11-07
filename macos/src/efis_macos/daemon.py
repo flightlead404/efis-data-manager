@@ -190,15 +190,27 @@ class EFISDaemon:
     def _initialize_notifications(self):
         """Initialize the notification system."""
         try:
+            # Import NotificationPriority enum
+            from notifications.notification_types import NotificationPriority
+            
             # Create notification preferences from config
             notification_config = getattr(self.config, 'notifications', {})
+            
+            # Convert integer priorities to enum values
+            min_priority_desktop = notification_config.get('min_priority_desktop', 2)
+            if isinstance(min_priority_desktop, int):
+                min_priority_desktop = NotificationPriority(min_priority_desktop)
+                
+            min_priority_email = notification_config.get('min_priority_email', 3)
+            if isinstance(min_priority_email, int):
+                min_priority_email = NotificationPriority(min_priority_email)
             
             preferences = NotificationPreferences(
                 enable_desktop=notification_config.get('enable_desktop', True),
                 enable_email=notification_config.get('enable_email', False),
                 email_address=notification_config.get('email_address'),
-                min_priority_desktop=notification_config.get('min_priority_desktop', 2),
-                min_priority_email=notification_config.get('min_priority_email', 3),
+                min_priority_desktop=min_priority_desktop,
+                min_priority_email=min_priority_email,
                 filter_types=notification_config.get('filter_types', []),
                 quiet_hours_start=notification_config.get('quiet_hours_start'),
                 quiet_hours_end=notification_config.get('quiet_hours_end')
