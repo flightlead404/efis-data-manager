@@ -12,9 +12,10 @@ from pathlib import Path
 from typing import Optional
 import logging
 
-# Add parent directory to path for imports when run as script
-sys.path.insert(0, str(Path(__file__).parent))
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "shared"))
+# Add directories to path for imports when run as script
+install_dir = Path(__file__).parent
+sys.path.insert(0, str(install_dir))
+sys.path.insert(0, str(install_dir / "shared"))
 
 from config import ConfigManager, MacOSConfig
 from logging_config import setup_daemon_logging
