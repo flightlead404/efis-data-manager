@@ -12,11 +12,12 @@ from pathlib import Path
 from typing import Optional
 import logging
 
-from .config import ConfigManager, MacOSConfig
-from .logging_config import setup_daemon_logging
+# Add parent directory to path for imports when run as script
+sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / "shared"))
 
-# Import notification system
-sys.path.append(str(Path(__file__).parent.parent.parent.parent / "shared"))
+from config import ConfigManager, MacOSConfig
+from logging_config import setup_daemon_logging
 from notifications import NotificationManager, NotificationPreferences
 
 
@@ -213,8 +214,8 @@ class EFISDaemon:
         
         # Initialize GRT management components
         try:
-            from .grt_scraper import GRTWebScraper
-            from .download_manager import DownloadManager
+            from grt_scraper import GRTWebScraper
+            from download_manager import DownloadManager
             
             # Initialize scraper and download manager
             self.grt_scraper = GRTWebScraper()
@@ -229,7 +230,7 @@ class EFISDaemon:
         
         # Initialize USB drive processor
         try:
-            from .usb_drive_processor import USBDriveProcessor
+            from usb_drive_processor import USBDriveProcessor
             
             self.usb_processor = USBDriveProcessor(self.config)
             
