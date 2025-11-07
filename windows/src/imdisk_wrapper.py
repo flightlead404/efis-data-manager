@@ -307,8 +307,12 @@ class ImDiskWrapper:
         mounted_drives = []
         
         try:
-            # Query ImDisk for mounted devices (use MountImg.exe syntax)
-            cmd = [str(self.mount_tool_path), "/List"]
+            # Query ImDisk for mounted devices (use command-line version)
+            imdisk_cli = self.mount_tool_path.parent / "imdisk.exe"
+            if not imdisk_cli.exists():
+                imdisk_cli = self.mount_tool_path
+                
+            cmd = [str(imdisk_cli), "-l"]  # List devices
             
             result = subprocess.run(
                 cmd,
@@ -602,8 +606,8 @@ def main():
     parser.add_argument('--drive', metavar='DRIVE_LETTER', default='E:', 
                        help='Drive letter to use (default: E:)')
     parser.add_argument('--tool', metavar='PATH', 
-                       default=r'C:\Program Files\ImDisk\MountImg.exe',
-                       help='Path to MountImg.exe (command-line version)')
+                       default=r'C:\Program Files\ImDisk\imdisk.exe',
+                       help='Path to imdisk.exe (command-line version)')
     parser.add_argument('--verbose', '-v', action='store_true',
                        help='Enable verbose logging')
     
