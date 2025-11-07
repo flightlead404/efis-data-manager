@@ -14,11 +14,22 @@ import logging
 
 # Add directories to path for imports when run as script
 install_dir = Path(__file__).parent
-sys.path.insert(0, str(install_dir))
-sys.path.insert(0, str(install_dir / "shared"))
 
-from config import ConfigManager, MacOSConfig
-from logging_config import setup_daemon_logging
+# Import local modules using importlib to avoid conflicts with shared/config
+import importlib.util
+spec = importlib.util.spec_from_file_location("local_config", install_dir / "config.py")
+local_config = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(local_config)
+ConfigManager = local_config.ConfigManager
+MacOSConfig = local_config.MacOSConfig
+
+spec = importlib.util.spec_from_file_location("logging_config", install_dir / "logging_config.py")
+logging_config_module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(logging_config_module)
+setup_daemon_logging = logging_config_module.setup_daemon_logging
+
+# Add shared directory for shared modules
+sys.path.insert(0, str(install_dir / "shared"))
 from notifications import NotificationManager, NotificationPreferences
 
 
