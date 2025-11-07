@@ -580,3 +580,140 @@ class VirtualDriveManager:
             self.logger.error(f"Error listing drive contents: {e}")
             
         return contents
+
+
+def main():
+    """Command-line interface for ImDisk wrapper testing."""
+    import argparse
+    import sys
+    
+    parser = argparse.ArgumentParser(description='ImDisk VHD Management Tool')
+    parser.add_argument('--test', action='store_true', 
+                       help='Test ImDisk installation and basic functionality')
+    parser.add_argument('--mount', metavar='VHD_FILE', 
+                       help='Mount a VHD file')
+    parser.add_argument('--unmount', metavar='DRIVE_LETTER', 
+                       help='Unmount a drive letter')
+    parser.add_argument('--drive', metavar='DRIVE_LETTER', default='E:', 
+                       help='Drive letter to use (default: E:)')
+    parser.add_argument('--tool', metavar='PATH', 
+                       default=r'C:\Program Files\ImDisk\MountImg.exe',
+                       help='Path to MountImg.exe')
+    parser.add_argument('--verbose', '-v', action='store_true',
+                       help='Enable verbose logging')
+    
+    args = parser.parse_args()
+    
+    # Setup logging
+    log_level = logging.DEBUG if args.verbose else logging.INFO
+    logging.basicConfig(
+        level=log_level,
+        format='%(asctime)s - %(levelname)s - %(message)s'
+    )
+    logger = logging.getLogger(__name__)
+    
+    try:
+        if args.test:
+            print("Testing ImDisk installation and functionality...")
+            print(f"ImDisk tool path: {args.tool}")
+            
+            # Check if ImDisk tool exists
+            if not Path(args.tool).exists():
+                print(f"❌ ERROR: ImDisk tool not found at: {args.tool}")
+                print("Please install ImDisk Toolkit from: https://www.ltr-data.se/opencode.html/#ImDisk")
+                return 1
+            else:
+                print(f"✅ ImDisk tool found: {args.tool}")
+            
+            # Initialize wrapper
+            try:
+                wrapper = ImDiskWrapper(args.tool, logger)
+                print("✅ ImDisk wrapper initialized successfully")
+            except Exception as e:
+                print(f"❌ ERROR: Failed to initialize ImDisk wrapper: {e}")
+                return 1
+            
+            # Test listing mounted drives
+            try:
+                mounted_drives = wrapper.list_mounted_drives()
+                print(f"✅ Successfully queried mounted drives: {len(mounted_drives)} found")
+                
+                if mounted_drives:
+                    print("\nCurrently mounted ImDisk drives:")
+                    for drive in mounted_drives:
+                        print(f"  - {drive.drive_letter} -> {drive.vhd_path}")
+                else:
+                    print("  No ImDisk drives currently mounted")
+                    
+            except Exception as e:
+                print(f"⚠️  WARNING: Could not list mounted drives: {e}")
+            
+            # Test drive letter availability
+            test_drive = args.drive
+            if wrapper.is_drive_mounted(test_drive):
+                print(f"ℹ️  Drive {test_drive} is currently in use")
+                drive_info = wrapper.get_drive_info(test_drive)
+                if drive_info:
+                    print(f"   VHD: {drive_info.vhd_path}")
+                    if drive_info.free_space_bytes:
+                        free_gb = drive_info.free_space_bytes / (1024**3)
+                        print(f"   Free space: {free_gb:.1f} GB")
+            else:
+                print(f"✅ Drive letter {test_drive} is available for mounting")
+            
+            print("\n🎉 ImDisk test completed successfully!")
+            print("\nNext steps:")
+            print("1. Create or locate your VHD file")
+            print(f"2. Test mounting: python {__file__} --mount path\\to\\file.vhd --drive {test_drive}")
+            print(f"3. Test unmounting: python {__file__} --unmount {test_drive}")
+            
+            return 0
+            
+        elif args.mount:
+            vhd_file = args.mount
+            drive_letter = args.drive
+            
+            print(f"Mounting {vhd_file} to {drive_letter}...")
+            
+            wrapper = ImDiskWrapper(args.tool, logger)
+            result = wrapper.mount_vhd(vhd_file, drive_letter)
+            
+            if result == MountResult.SUCCESS:
+                print(f"✅ Successfully mounted {vhd_file} to {drive_letter}")
+                return 0
+            else:
+                print(f"❌ Mount failed: {result.value}")
+                return 1
+                
+        elif args.unmount:
+            drive_letter = args.unmount
+            
+            print(f"Unmounting {drive_letter}...")
+            
+            wrapper = ImDiskWrapper(args.tool, logger)
+            result = wrapper.unmount_drive(drive_letter)
+            
+            if result == MountResult.SUCCESS:
+                print(f"✅ Successfully unmounted {drive_letter}")
+                return 0
+            else:
+                print(f"❌ Unmount failed: {result.value}")
+                return 1
+                
+        else:
+            parser.print_help()
+            return 0
+            
+    except KeyboardInterrupt:
+        print("\n⚠️  Operation cancelled by user")
+        return 1
+    except Exception as e:
+        print(f"❌ Unexpected error: {e}")
+        if args.verbose:
+            import traceback
+            traceback.print_exc()
+        return 1
+
+
+if __name__ == '__main__':
+    sys.exit(main())
