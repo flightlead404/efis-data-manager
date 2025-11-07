@@ -159,42 +159,94 @@ pip install -e .
    python src\imdisk_wrapper.py --test
    ```
 
-### Step 5: Install Windows Service
-
-```cmd
-# Install the Windows service
-cd windows
-python install.py
-
-# Or use the CLI tool
-windows\efis.bat service install
-```
-
-### Step 6: Configure Windows Settings
+### Step 5: Configure Windows Settings
 
 Create or edit `config\efis_config.yaml`:
 
 ```yaml
 windows:
   # Virtual drive configuration
-  virtualDriveFile: "C:/Users/fligh/OneDrive/Desktop/virtualEFISUSB.vhd"
+  virtualDriveFile: "C:/path/to/virtualEFISUSB.vhd"
   mountTool: "C:/Program Files/ImDisk/MountImg.exe"
   driveLetter: "E:"
   
-  # Network configuration - UPDATE WITH YOUR MACOS IP
-  macbookIP: "192.168.1.100"  # Replace with actual macOS IP
-  syncUser: "mwalker"         # Replace with actual macOS username
-  syncPath: "/Users/mwalker/EFIS-Sync"
+  # Network configuration
+  macbookHostname: "YourMacName.local"  # Primary - works with DHCP
+  macbookIP: "192.168.1.100"            # Fallback if hostname fails
+  syncPort: 22
   
   # Timing settings
   syncInterval: 1800  # 30 minutes
-  checkInterval: 300  # 5 minutes
+  retryAttempts: 3
+  retryDelay: 600     # 10 minutes
 
 logging:
   logLevel: "INFO"
-  logToFile: true
-  logFile: "logs/windows.log"
 ```
+
+### Step 6: Install Windows Service
+
+```cmd
+# Navigate to windows directory
+cd windows
+
+# Install the service
+python install.py
+```
+
+**If installation fails with "service already exists":**
+```cmd
+# Delete the existing service first
+sc delete EFISDataManager
+
+# Then reinstall
+python install.py
+```
+
+### Step 7: Start and Verify Service
+
+```cmd
+# Start the service
+sc start EFISDataManager
+
+# Check service status
+sc query EFISDataManager
+```
+
+**Expected output when running:**
+```
+STATE: 4  RUNNING
+```
+
+**Service management commands:**
+```cmd
+# Stop the service
+sc stop EFISDataManager
+
+# Check service status
+sc query EFISDataManager
+
+# View service configuration
+sc qc EFISDataManager
+```
+
+**Troubleshooting:**
+
+If service fails to start (error 1053):
+1. Test the service script directly:
+   ```cmd
+   python "C:\Program Files\EFIS Data Manager\efis_service.py"
+   ```
+2. Check for error messages
+3. Verify all dependencies are installed:
+   ```cmd
+   pip install -r windows\requirements.txt
+   ```
+4. Check Windows Event Viewer → Windows Logs → Application for detailed errors
+
+### Step 8: Verify Operation
+
+
 
 ## macOS Installation
 
