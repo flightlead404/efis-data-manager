@@ -156,7 +156,7 @@ pip install -e .
 3. **Test virtual drive mounting:**
    ```cmd
    cd windows
-   python src\efis_windows\imdisk_wrapper.py --test
+   python src\imdisk_wrapper.py --test
    ```
 
 ### Step 5: Install Windows Service
