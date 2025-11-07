@@ -7,6 +7,7 @@ import os
 import subprocess
 import logging
 import time
+import sys
 from typing import Optional, Dict, Any, List
 from pathlib import Path
 from dataclasses import dataclass
