@@ -14,7 +14,13 @@ from typing import Dict, List, Optional, Tuple, Set
 from dataclasses import dataclass
 from datetime import datetime
 
-from .config import MacOSConfig
+# Use importlib to import config to avoid conflicts
+import importlib.util
+from pathlib import Path
+spec = importlib.util.spec_from_file_location("local_config", Path(__file__).parent / "config.py")
+local_config = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(local_config)
+MacOSConfig = local_config.MacOSConfig
 
 
 @dataclass
@@ -664,8 +670,8 @@ class USBDriveProcessor:
             self.logger.info(f"Identified EFIS drive: {efis_info.identifier}")
             
             # Process EFIS files using the file processor
-            from .efis_file_processor import EFISFileProcessor
-            from .usb_drive_updater import USBDriveUpdater
+            from efis_file_processor import EFISFileProcessor
+            from usb_drive_updater import USBDriveUpdater
             
             file_processor = EFISFileProcessor(self.config)
             processing_results = file_processor.process_efis_drive(efis_info.mount_path)

@@ -12,8 +12,15 @@ from typing import Dict, List, Optional, Tuple
 from datetime import datetime
 from dataclasses import dataclass
 
-from .config import MacOSConfig
-from .usb_drive_processor import SafeDriveAccess
+# Use importlib to import config to avoid conflicts
+import importlib.util
+from pathlib import Path
+spec = importlib.util.spec_from_file_location("local_config", Path(__file__).parent / "config.py")
+local_config = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(local_config)
+MacOSConfig = local_config.MacOSConfig
+
+from usb_drive_processor import SafeDriveAccess
 
 
 @dataclass
