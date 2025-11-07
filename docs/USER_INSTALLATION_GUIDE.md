@@ -78,6 +78,19 @@ This guide provides step-by-step instructions for installing and setting up the 
    pip --version
    ```
 
+**⚠️ CRITICAL: Fix Windows App Execution Aliases**
+
+If you get "python was not found; run without arguments to install from the microsoft store", you need to disable Windows Store redirects:
+
+1. Open **Settings** → **Apps** → **App execution aliases**
+2. Turn **OFF** the toggles for:
+   - `App Installer python.exe`
+   - `App Installer python3.exe`
+3. Close and reopen Command Prompt
+4. Test again: `python --version`
+
+This is a common Windows 10/11 issue where the system redirects `python` to the Microsoft Store even when Python is properly installed.
+
 #### Install ImDisk Toolkit
 1. Download ImDisk from [LTR Data](https://www.ltr-data.se/opencode.html/#ImDisk)
 2. Run the installer **as Administrator**
@@ -425,11 +438,27 @@ windows\efis.bat sync --test
 ### Common Windows Issues
 
 #### Issue: Python not found
-**Solution:**
+**Error:** "python was not found; run without arguments to install from the microsoft store"
+
+**Most Common Solution - Windows App Execution Aliases:**
+1. Open **Settings** → **Apps** → **App execution aliases**
+2. Turn **OFF** these toggles:
+   - `App Installer python.exe`
+   - `App Installer python3.exe`
+3. Close and reopen Command Prompt
+4. Test: `python --version`
+
+**Alternative Solutions:**
 ```cmd
+# Try the Python Launcher instead
+py --version
+
 # Reinstall Python with PATH option checked
 # Or manually add to PATH:
 set PATH=%PATH%;C:\Python39;C:\Python39\Scripts
+
+# Use full path as workaround
+"C:\Users\%USERNAME%\AppData\Local\Programs\Python\Python311\python.exe" --version
 ```
 
 #### Issue: ImDisk installation fails

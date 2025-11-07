@@ -36,9 +36,14 @@ REM Install dependencies
 echo Installing dependencies...
 pip install -r requirements.txt
 if errorlevel 1 (
-    echo ERROR: Failed to install dependencies
-    pause
-    exit /b 1
+    echo WARNING: Standard requirements failed, trying flexible versions...
+    pip install -r requirements-flexible.txt
+    if errorlevel 1 (
+        echo ERROR: Failed to install dependencies with both requirement files
+        echo Try installing manually: pip install pywin32 pyyaml requests psutil watchdog colorlog
+        pause
+        exit /b 1
+    )
 )
 
 REM Install in development mode
