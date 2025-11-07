@@ -268,30 +268,31 @@ class WindowsInstaller:
             # Service executable command
             service_cmd = f'"{sys.executable}" "{self.install_dir / "efis_service.py"}"'
             
-            # Create service
+            # Create service (sc command requires specific format)
             create_cmd = [
                 "sc", "create", service_name,
-                "binPath=", service_cmd,
-                "DisplayName=", service_display_name,
-                "start=", "auto",
-                "type=", "own"
+                f"binPath= {service_cmd}",
+                f"DisplayName= {service_display_name}",
+                "start= auto",
+                "type= own"
             ]
             
+            self.logger.debug(f"Running command: {' '.join(create_cmd)}")
             result = subprocess.run(create_cmd, capture_output=True, text=True)
+            
             if result.returncode != 0:
-                raise Exception(f"Service creation failed: {result.stderr}")
+                error_msg = result.stderr.strip() if result.stderr else result.stdout.strip()
+                raise Exception(f"Service creation failed (code {result.returncode}): {error_msg}")
             
             # Set service description
-            desc_cmd = [
-                "sc", "description", service_name, service_description
-            ]
+            desc_cmd = ["sc", "description", service_name, service_description]
             subprocess.run(desc_cmd, capture_output=True, text=True)
             
             # Set service recovery options
             recovery_cmd = [
                 "sc", "failure", service_name,
-                "reset=", "86400",  # Reset failure count after 24 hours
-                "actions=", "restart/60000/restart/60000/restart/60000"  # Restart after 1 minute
+                "reset= 86400",  # Reset failure count after 24 hours
+                "actions= restart/60000/restart/60000/restart/60000"  # Restart after 1 minute
             ]
             subprocess.run(recovery_cmd, capture_output=True, text=True)
             
