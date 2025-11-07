@@ -1,6 +1,6 @@
 """
-ImDisk wrapper for VHD mounting operations.
-Provides a Python interface to ImDisk MountImg.exe for virtual drive management.
+ImTools MountImg wrapper for VHD mounting operations.
+Provides a Python interface to ImTools MountImg.exe for virtual drive management.
 """
 
 import os
@@ -38,7 +38,7 @@ class DriveInfo:
 
 class ImDiskWrapper:
     """
-    Wrapper class for ImDisk MountImg.exe operations.
+    Wrapper class for ImTools MountImg.exe operations.
     
     Provides methods for mounting, unmounting, and checking VHD files
     with proper error handling and logging integration.
@@ -46,7 +46,7 @@ class ImDiskWrapper:
     
     def __init__(self, mount_tool_path: str, logger: Optional[logging.Logger] = None):
         """
-        Initialize ImDisk wrapper.
+        Initialize ImTools MountImg wrapper.
         
         Args:
             mount_tool_path: Path to MountImg.exe
@@ -57,9 +57,9 @@ class ImDiskWrapper:
         
         # Validate mount tool exists
         if not self.mount_tool_path.exists():
-            raise FileNotFoundError(f"ImDisk MountImg.exe not found at: {mount_tool_path}")
+            raise FileNotFoundError(f"ImTools MountImg.exe not found at: {mount_tool_path}")
             
-        self.logger.info(f"ImDisk wrapper initialized with tool: {mount_tool_path}")
+        self.logger.info(f"ImTools MountImg wrapper initialized with tool: {mount_tool_path}")
         
     def mount_vhd(self, vhd_path: str, drive_letter: str, 
                   timeout: int = 30) -> MountResult:
@@ -299,7 +299,7 @@ class ImDiskWrapper:
             
     def list_mounted_drives(self) -> List[DriveInfo]:
         """
-        List all ImDisk mounted drives.
+        List all MountImg mounted drives.
         
         Returns:
             List of DriveInfo objects for mounted drives
@@ -307,12 +307,8 @@ class ImDiskWrapper:
         mounted_drives = []
         
         try:
-            # Query ImDisk for mounted devices (use command-line version)
-            imdisk_cli = self.mount_tool_path.parent / "imdisk.exe"
-            if not imdisk_cli.exists():
-                imdisk_cli = self.mount_tool_path
-                
-            cmd = [str(imdisk_cli), "-l"]  # List devices
+            # Query MountImg for mounted devices
+            cmd = [str(self.mount_tool_path), "/List"]  # List mounted drives
             
             result = subprocess.run(
                 cmd,
@@ -325,7 +321,7 @@ class ImDiskWrapper:
             
             if result.returncode == 0 and result.stdout:
                 # Debug: log the actual output to understand the format
-                self.logger.debug(f"ImDisk -l output: {repr(result.stdout)}")
+                self.logger.debug(f"MountImg /List output: {repr(result.stdout)}")
                 
                 # Parse ImDisk output to find mounted drives
                 lines = result.stdout.strip().split('\n')
@@ -337,7 +333,7 @@ class ImDiskWrapper:
                     self.logger.debug(f"Parsing line: {repr(line)}")
                     
                     # Look for lines that contain drive letters
-                    # ImDisk output format may vary, so check multiple patterns
+                    # MountImg output format may vary, so check multiple patterns
                     if ':' in line:
                         # Extract potential drive letters from the line
                         parts = line.split()
@@ -486,7 +482,7 @@ class VirtualDriveManager:
         self.config = config
         self.logger = logger or logging.getLogger(__name__)
         
-        # Initialize ImDisk wrapper
+        # Initialize ImTools MountImg wrapper
         mount_tool_path = config.get('mountTool', r'C:\Program Files\ImDisk\MountImg.exe')
         self.imdisk = ImDiskWrapper(mount_tool_path, self.logger)
         
@@ -622,8 +618,8 @@ def main():
     parser.add_argument('--drive', metavar='DRIVE_LETTER', default='E:', 
                        help='Drive letter to use (default: E:)')
     parser.add_argument('--tool', metavar='PATH', 
-                       default=r'C:\Program Files\ImDisk\imdisk.exe',
-                       help='Path to imdisk.exe (command-line version)')
+                       default=r'C:\Program Files\ImDisk\MountImg.exe',
+                       help='Path to MountImg.exe')
     parser.add_argument('--verbose', '-v', action='store_true',
                        help='Enable verbose logging')
     
@@ -697,14 +693,14 @@ def main():
             
             # Debug: Show raw imdisk -l output
             if args.verbose:
-                print("\nRaw ImDisk command output:")
+                print("\nRaw MountImg command output:")
                 try:
                     import subprocess
-                    imdisk_path = Path(args.tool)
-                    if imdisk_path.exists():
-                        result = subprocess.run([str(imdisk_path), "-l"], 
+                    mountimg_path = Path(args.tool)
+                    if mountimg_path.exists():
+                        result = subprocess.run([str(mountimg_path), "/List"], 
                                               capture_output=True, text=True, timeout=10)
-                        print(f"Command: {imdisk_path} -l")
+                        print(f"Command: {mountimg_path} /List")
                         print(f"Return code: {result.returncode}")
                         print(f"Stdout: {repr(result.stdout)}")
                         print(f"Stderr: {repr(result.stderr)}")
