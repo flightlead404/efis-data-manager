@@ -93,12 +93,12 @@ class ImDiskWrapper:
                 if unmount_result != MountResult.SUCCESS:
                     return unmount_result
                     
-        # Prepare mount command (using correct MountImg.exe syntax)
+        # Prepare mount command (using MountImg.exe syntax)
         cmd = [
             str(self.mount_tool_path),
-            str(vhd_file),  # VHD file path (first argument)
-            "/Mount",       # Mount command
-            f"/Drive={drive_letter}"  # Drive letter assignment
+            str(vhd_file),           # VHD file path (first argument)
+            "/Mount",                # Mount operation
+            f"/Drive={drive_letter}" # Drive letter assignment
         ]
         
         try:
@@ -170,15 +170,15 @@ class ImDiskWrapper:
             self.logger.info(f"Drive {drive_letter} is not mounted")
             return MountResult.SUCCESS
             
-        # Prepare unmount command (using correct MountImg.exe syntax)
+        # Prepare unmount command (using MountImg.exe syntax)
         cmd = [
             str(self.mount_tool_path),
-            f"/Drive={drive_letter}",  # Drive letter to unmount
-            "/Unmount"                 # Unmount command
+            "/Unmount",              # Unmount operation
+            f"/Drive={drive_letter}" # Drive letter to unmount
         ]
         
         if force:
-            cmd.append("/Force")  # Force unmount
+            cmd.append("-f")  # Force unmount
             
         try:
             self.logger.info(f"Unmounting drive: {drive_letter}")
@@ -307,7 +307,7 @@ class ImDiskWrapper:
         mounted_drives = []
         
         try:
-            # Query ImDisk for mounted devices
+            # Query ImDisk for mounted devices (use MountImg.exe syntax)
             cmd = [str(self.mount_tool_path), "/List"]
             
             result = subprocess.run(
@@ -381,7 +381,7 @@ class ImDiskWrapper:
             VHD file path or None if not found
         """
         try:
-            # Query ImDisk for device information  
+            # Query ImDisk for device information (use MountImg.exe syntax)
             cmd = [str(self.mount_tool_path), "/List", f"/Drive={drive_letter}"]
             
             result = subprocess.run(
@@ -603,7 +603,7 @@ def main():
                        help='Drive letter to use (default: E:)')
     parser.add_argument('--tool', metavar='PATH', 
                        default=r'C:\Program Files\ImDisk\MountImg.exe',
-                       help='Path to MountImg.exe')
+                       help='Path to MountImg.exe (command-line version)')
     parser.add_argument('--verbose', '-v', action='store_true',
                        help='Enable verbose logging')
     
