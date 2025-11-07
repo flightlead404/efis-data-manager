@@ -8,7 +8,10 @@ from pathlib import Path
 from typing import Optional
 
 # Add shared modules to path
-sys.path.append(str(Path(__file__).parent.parent.parent / "shared"))
+shared_path = Path(__file__).parent / "shared"
+if str(shared_path) not in sys.path:
+    sys.path.insert(0, str(shared_path))
+
 from notifications import NotificationManager, NotificationPreferences
 
 
