@@ -269,12 +269,13 @@ class WindowsInstaller:
             service_cmd = f'"{sys.executable}" "{self.install_dir / "efis_service.py"}"'
             
             # Create service (sc command requires specific format)
+            # Note: sc.exe is very picky about parameter format
             create_cmd = [
                 "sc", "create", service_name,
-                f"binPath= {service_cmd}",
-                f"DisplayName= {service_display_name}",
-                "start= auto",
-                "type= own"
+                f"binPath={service_cmd}",
+                f"DisplayName={service_display_name}",
+                "start=auto",
+                "type=own"
             ]
             
             self.logger.debug(f"Running command: {' '.join(create_cmd)}")
@@ -291,8 +292,8 @@ class WindowsInstaller:
             # Set service recovery options
             recovery_cmd = [
                 "sc", "failure", service_name,
-                "reset= 86400",  # Reset failure count after 24 hours
-                "actions= restart/60000/restart/60000/restart/60000"  # Restart after 1 minute
+                "reset=86400",  # Reset failure count after 24 hours
+                "actions=restart/60000/restart/60000/restart/60000"  # Restart after 1 minute
             ]
             subprocess.run(recovery_cmd, capture_output=True, text=True)
             
