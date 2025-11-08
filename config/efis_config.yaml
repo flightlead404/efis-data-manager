@@ -14,7 +14,7 @@ windows:
   
   # Network synchronization settings
   syncInterval: 1800  # 30 minutes in seconds
-  macbookIP: "192.168.1.100"  # Update with actual MacBook IP
+  macbookIP: "192.168.1.102"  # Your MacBook IP
   syncPort: 22
   retryAttempts: 3
   retryDelay: 600  # 10 minutes in seconds
@@ -44,13 +44,7 @@ macos:
     - "EFIS_DRIVE"
     - ".efis_marker"
   
-  # GRT Avionics URLs
-  grtUrls:
-    navDatabase: "https://grtavionics.com/downloads/nav-database/"
-    hxrSoftware: "https://grtavionics.com/downloads/hxr-software/"
-    miniAPSoftware: "https://grtavionics.com/downloads/mini-ap-software/"
-    ahrsSoftware: "https://grtavionics.com/downloads/ahrs-software/"
-    servoSoftware: "https://grtavionics.com/downloads/servo-software/"
+
   
   # Web scraping settings
   userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
@@ -60,6 +54,14 @@ macos:
   # Daemon settings
   daemonName: "com.efis.datamanager"
   pidFile: "/tmp/efis_data_manager.pid"
+
+# GRT Avionics URLs (top-level, shared between platforms)
+grtUrls:
+  navDatabase: "https://grtavionics.com/getfile.aspx/NAV.DB"
+  hxrSoftware: "https://grtavionics.com/product/horizon-hxr-efis/"
+  miniAPSoftware: "https://grtavionics.com/downloads/mini-ap-software/"
+  ahrsSoftware: "https://grtavionics.com/downloads/ahrs-software/"
+  servoSoftware: "https://grtavionics.com/downloads/servo-software/"
 
 # Shared Settings
 logging:

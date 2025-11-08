@@ -306,24 +306,52 @@ class GRTWebScraper:
         
         soup = self._parse_html(response.text)
         
-        # Extract version from URL path
-        version = self._extract_version_from_url(hxr_url, 'hxr')
+        # Look for links that match the HXr software pattern
+        # Pattern: https://grtavionics.com/getfile.aspx/HXr/X/YY/HHXRUp.dat
+        download_url = None
+        version = None
         
-        # If no version in URL, try to extract from page content
+        # Search for all links on the page
+        for link in soup.find_all('a', href=True):
+            href = link['href']
+            
+            # Check if this is an HXr software download link
+            if 'getfile.aspx' in href and 'HXr' in href and 'HHXRUp.dat' in href:
+                # Convert relative URL to absolute
+                if not href.startswith('http'):
+                    href = urljoin(hxr_url, href)
+                
+                download_url = href
+                
+                # Extract version from URL path: /HXr/8/01/ -> 8.01
+                version_match = re.search(r'/HXr/(\d+)/(\d+)/', href)
+                if version_match:
+                    major = version_match.group(1)
+                    minor = version_match.group(2)
+                    version = f"{major}.{minor}"
+                
+                self.logger.info(f"Found HXr software: version {version}, URL: {download_url}")
+                break
+        
+        # If no direct download link found, try to find any HXr-related links
+        if not download_url:
+            download_links = self._find_download_links(soup, hxr_url)
+            hxr_links = [link for link in download_links 
+                        if 'hxr' in link[1].lower() or 'hxr' in link[0].lower()]
+            
+            if hxr_links:
+                download_url, link_text = hxr_links[0]
+                # Try to extract version from the URL
+                version = self._extract_version_from_url(download_url, 'hxr')
+        
+        # If still no version, try to extract from page content
         if not version:
             page_text = soup.get_text()
             version = self._extract_version_from_text(page_text, 'hxr')
         
-        # Find download links
-        download_links = self._find_download_links(soup, hxr_url)
-        hxr_links = [link for link in download_links 
-                    if 'hxr' in link[1].lower() or 'hxr' in link[0].lower()]
-        
-        if not hxr_links:
+        if not download_url:
             self.logger.warning("No HXr software download links found")
             return None
-        
-        download_url, link_text = hxr_links[0]
         
         return UpdateInfo(
             software_type="hxr_software",
@@ -335,7 +363,7 @@ class GRTWebScraper:
                 name="HXr Software",
                 version=version or "unknown",
                 url=download_url,
-                description=link_text
+                description=f"HXr EFIS Software v{version}" if version else "HXr EFIS Software"
             )
         )
     
