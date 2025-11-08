@@ -154,6 +154,7 @@ class GRTWebScraper:
                 r'v(\d+\.\d+)',  # vX.Y format
             ],
             'mini_ap': [
+                r'/Mini(?:AP)?/(\d+)/(\d+)/',  # URL path pattern like /MiniAP/7/05/
                 r'Version\s+(\d+\.\d+)',
                 r'v(\d+\.\d+)',
                 r'Mini.*?(\d+\.\d+)',
@@ -376,21 +377,71 @@ class GRTWebScraper:
             return None
         
         soup = self._parse_html(response.text)
-        page_text = soup.get_text()
         
-        # Extract version from page content
-        version = self._extract_version_from_text(page_text, 'mini_ap')
+        # Look for "Display Unit Software" link on the product page
+        download_url = None
+        version = None
         
-        # Find download links
-        download_links = self._find_download_links(soup, mini_ap_url)
-        mini_ap_links = [link for link in download_links 
-                        if 'mini' in link[1].lower() or 'ap' in link[1].lower()]
+        # Search for all links on the page
+        for link in soup.find_all('a', href=True):
+            href = link['href']
+            link_text = link.get_text(strip=True)
+            
+            # Look for "Display Unit Software" link
+            if 'display unit software' in link_text.lower():
+                # Convert relative URL to absolute
+                if not href.startswith('http'):
+                    href = urljoin(mini_ap_url, href)
+                
+                download_url = href
+                
+                # Try to extract version from URL path
+                # Pattern similar to HXr: /MiniAP/X/YY/ or /Mini/X/YY/
+                version_match = re.search(r'/Mini(?:AP)?/(\d+)/(\d+)/', href)
+                if version_match:
+                    major = version_match.group(1)
+                    minor = version_match.group(2)
+                    version = f"{major}.{minor}"
+                
+                self.logger.info(f"Found Mini A/P software: version {version}, URL: {download_url}")
+                break
         
-        if not mini_ap_links:
+        # If no "Display Unit Software" link found, try generic approach
+        if not download_url:
+            # Look for getfile.aspx links with Mini or MiniAP in them
+            for link in soup.find_all('a', href=True):
+                href = link['href']
+                
+                if 'getfile.aspx' in href and ('Mini' in href or 'mini' in href):
+                    if not href.startswith('http'):
+                        href = urljoin(mini_ap_url, href)
+                    
+                    download_url = href
+                    version_match = re.search(r'/Mini(?:AP)?/(\d+)/(\d+)/', href)
+                    if version_match:
+                        major = version_match.group(1)
+                        minor = version_match.group(2)
+                        version = f"{major}.{minor}"
+                    break
+        
+        # If still no download link, try old approach
+        if not download_url:
+            download_links = self._find_download_links(soup, mini_ap_url)
+            mini_ap_links = [link for link in download_links 
+                            if 'mini' in link[1].lower() or 'ap' in link[1].lower()]
+            
+            if mini_ap_links:
+                download_url, link_text = mini_ap_links[0]
+                version = self._extract_version_from_url(download_url, 'mini_ap')
+        
+        # If still no version, try to extract from page content
+        if not version:
+            page_text = soup.get_text()
+            version = self._extract_version_from_text(page_text, 'mini_ap')
+        
+        if not download_url:
             self.logger.warning("No Mini A/P software download links found")
             return None
-        
-        download_url, link_text = mini_ap_links[0]
         
         return UpdateInfo(
             software_type="mini_ap_software",
@@ -402,7 +453,7 @@ class GRTWebScraper:
                 name="Mini A/P Software",
                 version=version or "unknown",
                 url=download_url,
-                description=link_text
+                description=f"Mini A/P Display Unit Software v{version}" if version else "Mini A/P Display Unit Software"
             )
         )
     

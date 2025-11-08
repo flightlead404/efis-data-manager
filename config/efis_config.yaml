@@ -59,7 +59,7 @@ macos:
 grtUrls:
   navDatabase: "https://grtavionics.com/getfile.aspx/NAV.DB"
   hxrSoftware: "https://grtavionics.com/product/horizon-hxr-efis/"
-  miniAPSoftware: "https://grtavionics.com/downloads/mini-ap-software/"
+  miniAPSoftware: "https://grtavionics.com/product/mini-ap-efis/"
   ahrsSoftware: "https://grtavionics.com/downloads/ahrs-software/"
   servoSoftware: "https://grtavionics.com/downloads/servo-software/"
 
