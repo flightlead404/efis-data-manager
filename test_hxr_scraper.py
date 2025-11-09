@@ -68,12 +68,39 @@ def test_mini_ap_scraping():
         print("\n❌ Failed to find Mini A/P software")
         return False
 
+def test_ahrs_scraping():
+    """Test AHRS software scraping."""
+    print("\n\nTesting AHRS software scraping...")
+    print("-" * 60)
+    
+    scraper = GRTWebScraper()
+    
+    # Test with the product page URL (same as Mini A/P)
+    ahrs_url = "https://grtavionics.com/product/mini-ap-efis/"
+    
+    print(f"\nScraping: {ahrs_url}")
+    update_info = scraper.check_ahrs_software(ahrs_url)
+    
+    if update_info:
+        print("\n✅ Successfully found AHRS software!")
+        print(f"   Software Type: {update_info.software_type}")
+        print(f"   Latest Version: {update_info.latest_version}")
+        print(f"   Download URL: {update_info.download_url}")
+        if update_info.file_info:
+            print(f"   Description: {update_info.file_info.description}")
+        return True
+    else:
+        print("\n❌ Failed to find AHRS software")
+        return False
+
 if __name__ == "__main__":
     success_hxr = test_hxr_scraping()
     success_mini = test_mini_ap_scraping()
+    success_ahrs = test_ahrs_scraping()
     
     print("\n" + "=" * 60)
     print(f"HXr Test: {'✅ PASSED' if success_hxr else '❌ FAILED'}")
     print(f"Mini A/P Test: {'✅ PASSED' if success_mini else '❌ FAILED'}")
+    print(f"AHRS Test: {'✅ PASSED' if success_ahrs else '❌ FAILED'}")
     
-    sys.exit(0 if (success_hxr and success_mini) else 1)
+    sys.exit(0 if (success_hxr and success_mini and success_ahrs) else 1)

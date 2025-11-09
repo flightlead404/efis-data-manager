@@ -160,6 +160,7 @@ class GRTWebScraper:
                 r'Mini.*?(\d+\.\d+)',
             ],
             'ahrs': [
+                r'MiniAHRSUp(\d)(\d)',  # Filename pattern like MiniAHRSUp71.dat -> 7.1
                 r'AHRS.*?(\d+\.\d+)',
                 r'Version\s+(\d+\.\d+)',
                 r'v(\d+\.\d+)',
@@ -458,7 +459,7 @@ class GRTWebScraper:
         )
     
     def check_ahrs_software(self, ahrs_url: str) -> Optional[UpdateInfo]:
-        """Check for AHRS software updates."""
+        """Check for AHRS software updates (Mini AHRS)."""
         self.logger.info("Checking AHRS software updates...")
         
         response = self._make_request(ahrs_url)
@@ -466,21 +467,58 @@ class GRTWebScraper:
             return None
         
         soup = self._parse_html(response.text)
-        page_text = soup.get_text()
         
-        # Extract version from page content
-        version = self._extract_version_from_text(page_text, 'ahrs')
+        # Look for AHRS software link on the product page
+        # Pattern: https://grtavionics.com/getfile.aspx/Mini/AHRS/MiniAHRSUpXY.dat
+        download_url = None
+        version = None
         
-        # Find download links
-        download_links = self._find_download_links(soup, ahrs_url)
-        ahrs_links = [link for link in download_links 
-                     if 'ahrs' in link[1].lower()]
+        # Search for all links on the page
+        for link in soup.find_all('a', href=True):
+            href = link['href']
+            link_text = link.get_text(strip=True)
+            
+            # Look for AHRS-related links
+            if 'ahrs' in link_text.lower() or 'MiniAHRS' in href:
+                # Convert relative URL to absolute
+                if not href.startswith('http'):
+                    href = urljoin(ahrs_url, href)
+                
+                download_url = href
+                
+                # Extract version from filename: MiniAHRSUp71.dat -> 7.1
+                version_match = re.search(r'MiniAHRSUp(\d)(\d)', href)
+                if version_match:
+                    major = version_match.group(1)
+                    minor = version_match.group(2)
+                    version = f"{major}.{minor}"
+                
+                self.logger.info(f"Found AHRS software: version {version}, URL: {download_url}")
+                break
         
-        if not ahrs_links:
+        # If no direct link found, try generic approach
+        if not download_url:
+            download_links = self._find_download_links(soup, ahrs_url)
+            ahrs_links = [link for link in download_links 
+                         if 'ahrs' in link[1].lower() or 'ahrs' in link[0].lower()]
+            
+            if ahrs_links:
+                download_url, link_text = ahrs_links[0]
+                # Try to extract version from filename
+                version_match = re.search(r'MiniAHRSUp(\d)(\d)', download_url)
+                if version_match:
+                    major = version_match.group(1)
+                    minor = version_match.group(2)
+                    version = f"{major}.{minor}"
+        
+        # If still no version, try to extract from page content
+        if not version:
+            page_text = soup.get_text()
+            version = self._extract_version_from_text(page_text, 'ahrs')
+        
+        if not download_url:
             self.logger.warning("No AHRS software download links found")
             return None
-        
-        download_url, link_text = ahrs_links[0]
         
         return UpdateInfo(
             software_type="ahrs_software",

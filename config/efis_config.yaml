@@ -60,7 +60,7 @@ grtUrls:
   navDatabase: "https://grtavionics.com/getfile.aspx/NAV.DB"
   hxrSoftware: "https://grtavionics.com/product/horizon-hxr-efis/"
   miniAPSoftware: "https://grtavionics.com/product/mini-ap-efis/"
-  ahrsSoftware: "https://grtavionics.com/downloads/ahrs-software/"
+  ahrsSoftware: "https://grtavionics.com/product/mini-ap-efis/"
   servoSoftware: "https://grtavionics.com/downloads/servo-software/"
 
 # Shared Settings
