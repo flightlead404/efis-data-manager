@@ -166,6 +166,7 @@ class GRTWebScraper:
                 r'v(\d+\.\d+)',
             ],
             'servo': [
+                r'ServoUp(\d)(\d)',  # Filename pattern like ServoUp14.dat -> 1.4
                 r'Servo.*?(\d+\.\d+)',
                 r'Version\s+(\d+\.\d+)',
                 r'v(\d+\.\d+)',
@@ -538,26 +539,86 @@ class GRTWebScraper:
         """Check for Servo software updates."""
         self.logger.info("Checking Servo software updates...")
         
+        # If the URL is a direct download link, extract version from it
+        if 'getfile.aspx' in servo_url and 'ServoUp' in servo_url:
+            download_url = servo_url
+            version = None
+            
+            # Extract version from filename: ServoUp14.dat -> 1.4
+            version_match = re.search(r'ServoUp(\d)(\d)', servo_url)
+            if version_match:
+                major = version_match.group(1)
+                minor = version_match.group(2)
+                version = f"{major}.{minor}"
+            
+            self.logger.info(f"Found Servo software: version {version}, URL: {download_url}")
+            
+            return UpdateInfo(
+                software_type="servo_software",
+                current_version=None,
+                latest_version=version or "unknown",
+                download_url=download_url,
+                needs_update=True,
+                file_info=VersionInfo(
+                    name="Servo Software",
+                    version=version or "unknown",
+                    url=download_url,
+                    description=f"Autopilot Servo Software v{version}" if version else "Autopilot Servo Software"
+                )
+            )
+        
+        # Otherwise, scrape the page for links
         response = self._make_request(servo_url)
         if not response:
             return None
         
         soup = self._parse_html(response.text)
-        page_text = soup.get_text()
         
-        # Extract version from page content
-        version = self._extract_version_from_text(page_text, 'servo')
+        # Look for servo software links
+        download_url = None
+        version = None
         
-        # Find download links
-        download_links = self._find_download_links(soup, servo_url)
-        servo_links = [link for link in download_links 
-                      if 'servo' in link[1].lower()]
+        for link in soup.find_all('a', href=True):
+            href = link['href']
+            
+            if 'ServoUp' in href or ('servo' in href.lower() and 'getfile.aspx' in href):
+                if not href.startswith('http'):
+                    href = urljoin(servo_url, href)
+                
+                download_url = href
+                
+                # Extract version from filename
+                version_match = re.search(r'ServoUp(\d)(\d)', href)
+                if version_match:
+                    major = version_match.group(1)
+                    minor = version_match.group(2)
+                    version = f"{major}.{minor}"
+                
+                self.logger.info(f"Found Servo software: version {version}, URL: {download_url}")
+                break
         
-        if not servo_links:
+        # Fallback to generic approach
+        if not download_url:
+            download_links = self._find_download_links(soup, servo_url)
+            servo_links = [link for link in download_links 
+                          if 'servo' in link[1].lower()]
+            
+            if servo_links:
+                download_url, link_text = servo_links[0]
+                version_match = re.search(r'ServoUp(\d)(\d)', download_url)
+                if version_match:
+                    major = version_match.group(1)
+                    minor = version_match.group(2)
+                    version = f"{major}.{minor}"
+        
+        # If still no version, try page content
+        if not version:
+            page_text = soup.get_text()
+            version = self._extract_version_from_text(page_text, 'servo')
+        
+        if not download_url:
             self.logger.warning("No Servo software download links found")
             return None
-        
-        download_url, link_text = servo_links[0]
         
         return UpdateInfo(
             software_type="servo_software",

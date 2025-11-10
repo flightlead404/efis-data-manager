@@ -61,7 +61,7 @@ grtUrls:
   hxrSoftware: "https://grtavionics.com/product/horizon-hxr-efis/"
   miniAPSoftware: "https://grtavionics.com/product/mini-ap-efis/"
   ahrsSoftware: "https://grtavionics.com/product/mini-ap-efis/"
-  servoSoftware: "https://grtavionics.com/downloads/servo-software/"
+  servoSoftware: "https://grtavionics.com/getfile.aspx/servo/ServoUp14.dat"
 
 # Shared Settings
 logging:
